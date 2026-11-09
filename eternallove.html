@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тест для тебя 💙</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #eaf4fd 0%, #c9e2f7 45%, #a3ccee 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-x: hidden;
+    position: relative;
+    color: #1e3a5f;
+  }
+
+  .heart {
+    position: fixed;
+    bottom: -50px;
+    pointer-events: none;
+    z-index: 0;
+    animation: floatUp linear forwards;
+  }
+  @keyframes floatUp {
+    to { transform: translateY(-110vh) rotate(360deg); }
+  }
+
+  .burst-heart {
+    position: fixed;
+    font-size: 22px;
+    pointer-events: none;
+    z-index: 999;
+    animation: burst 1.5s ease-out forwards;
+  }
+  @keyframes burst {
+    from { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+    to   { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.3); opacity: 0; }
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(14px);
+    border-radius: 28px;
+    padding: 36px 26px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(30, 58, 95, 0.25);
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.8);
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .big-emoji {
+    font-size: 56px;
+    margin-bottom: 14px;
+    animation: pulse 2s infinite ease-in-out;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.12); }
+  }
+
+  h1 {
+    font-size: 25px;
+    color: #1e3a5f;
+    margin-bottom: 12px;
+    line-height: 1.25;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    color: #4a6b8e;
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+
+  .hint {
+    font-size: 13px;
+    color: #7a96b4;
+    margin-bottom: 24px;
+  }
+
+  .btn {
+    background: linear-gradient(135deg, #6bb0e8, #3d7bc4);
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    padding: 15px 40px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(61, 123, 196, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    font-family: inherit;
+    margin-top: 8px;
+  }
+  .btn:hover:not(:disabled) { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 32px rgba(61, 123, 196, 0.5); }
+  .btn:active:not(:disabled) { transform: scale(0.96); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-secondary {
+    background: #fff;
+    color: #3d7bc4;
+    border: 2px solid #6bb0e8;
+    box-shadow: 0 4px 12px rgba(61, 123, 196, 0.15);
+  }
+  .btn-secondary:hover:not(:disabled) { background: #f3f9fe; }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+
+  .progress-wrap {
+    height: 8px;
+    background: #dbeaf8;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .progress-bar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #6bb0e8, #3d7bc4);
+    border-radius: 99px;
+    transition: width 0.45s ease;
+  }
+  .q-counter {
+    font-size: 12px;
+    color: #7a96b4;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  .question {
+    font-size: 19px;
+    color: #1e3a5f;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+
+  .question-hint {
+    font-size: 13px;
+    color: #7a96b4;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border: 2px solid #d0e3f5;
+    border-radius: 14px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font-size: 15px;
+    color: #2c4a6b;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    line-height: 1.35;
+    position: relative;
+  }
+  .option:hover:not(:disabled) {
+    border-color: #6bb0e8;
+    background: #f3f9fe;
+    transform: translateX(4px);
+  }
+  .option.selected,
+  .option.correct {
+    background: linear-gradient(135deg, #6bb0e8, #3d7bc4);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 18px rgba(61, 123, 196, 0.35);
+  }
+  .option.correct::after {
+    content: '✓';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 800;
+    font-size: 18px;
+  }
+  .option.wrong {
+    background: #fff0f0;
+    border-color: #e89191;
+    color: #a54545;
+  }
+  .option.wrong::after {
+    content: '✕';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 800;
+    color: #e89191;
+  }
+  .option.missed {
+    border: 2px dashed #6bb0e8;
+    background: #f3f9fe;
+    color: #3d7bc4;
+  }
+  .option.missed::after {
+    content: '✓';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 800;
+    color: #6bb0e8;
+  }
+  .option:disabled { cursor: default; }
+
+  /* убегающая кнопка */
+.option.runaway-btn {
+  cursor: pointer;
+  will-change: left, top, transform;
+}
+.option.runaway-free {
+  position: fixed !important;
+  z-index: 5000 !important;
+  margin: 0 !important;
+  box-shadow: 0 14px 36px rgba(30, 58, 95, 0.4);
+  transition: left 0.15s ease-out, top 0.15s ease-out,
+              transform 0.15s ease-out, opacity 0.3s;
+  backdrop-filter: blur(6px);
+}
+  /* правильный ответ всегда кликабелен поверх убегающего */
+  .option.keep-on-top {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* заблокированная кнопка */
+  .option.blocked-btn {
+    cursor: not-allowed;
+  }
+
+  .reply {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    font-size: 14px;
+    color: #3d7bc4;
+    font-weight: 600;
+    margin-top: 14px;
+    padding: 0 8px;
+    line-height: 1.5;
+    text-align: left;
+  }
+  .reply.show {
+    opacity: 1;
+    max-height: 260px;
+    padding: 14px 8px 0;
+    border-top: 1px dashed #c9ddf0;
+    margin-top: 16px;
+  }
+
+  /* --- календарь --- */
+  .calendar-wrap {
+    background: #f5faff;
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 18px;
+    border: 1px solid #d8e8f7;
+  }
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .calendar-header button {
+    background: #e3f0fb;
+    border: none;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+    color: #3d7bc4;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background 0.2s;
+  }
+  .calendar-header button:hover:not(:disabled) { background: #d0e3f5; }
+  .calendar-header button:disabled { opacity: 0.3; cursor: not-allowed; }
+  #monthLabel {
+    font-weight: 700;
+    color: #1e3a5f;
+    font-size: 15px;
+  }
+  .calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .calendar-weekdays div {
+    text-align: center;
+    font-size: 11px;
+    color: #7a96b4;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .day {
+    aspect-ratio: 1;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #2c4a6b;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    font-weight: 600;
+  }
+  .day:hover:not(:disabled) { background: #e3f0fb; }
+  .day.today { border: 1.5px solid #6bb0e8; }
+  .day.selected {
+    background: linear-gradient(135deg, #6bb0e8, #3d7bc4);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(61, 123, 196, 0.4);
+  }
+  .day.disabled {
+    color: #c5d5e5;
+    cursor: not-allowed;
+  }
+
+  .time-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .time-slot {
+    background: #fff;
+    border: 2px solid #d0e3f5;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #2c4a6b;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .time-slot:hover { border-color: #6bb0e8; background: #f3f9fe; }
+  .time-slot.selected {
+    background: linear-gradient(135deg, #6bb0e8, #3d7bc4);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(61, 123, 196, 0.4);
+  }
+
+  .love-ring {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    margin: 14px auto 20px;
+    background: #fff;
+    border: 5px solid #6bb0e8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 32px rgba(61, 123, 196, 0.35);
+    animation: pulse 1.6s infinite ease-in-out;
+  }
+  .love-ring .num { font-size: 32px; font-weight: 800; color: #3d7bc4; line-height: 1; }
+  .love-ring .lbl { font-size: 10px; color: #7a96b4; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; }
+
+  .info-card {
+    background: linear-gradient(135deg, #f0f8ff, #e3f0fb);
+    border: 2px solid #c9ddf0;
+    border-radius: 18px;
+    padding: 18px;
+    margin: 14px 0;
+    text-align: left;
+    line-height: 1.6;
+    color: #2c4a6b;
+    font-size: 14px;
+  }
+  .info-card .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #7a96b4;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .info-card .value {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e3a5f;
+    margin-bottom: 12px;
+  }
+  .info-card .value:last-child { margin-bottom: 0; }
+
+  .summary-note {
+    background: linear-gradient(135deg, #f0f8ff, #e3f0fb);
+    border: 2px dashed #a8cbec;
+    border-radius: 18px;
+    padding: 18px;
+    margin: 14px 0 8px;
+    text-align: left;
+    line-height: 1.65;
+    color: #2c4a6b;
+    font-size: 14px;
+  }
+  .summary-note p { margin-bottom: 10px; }
+  .summary-note p:last-child { margin-bottom: 0; }
+
+  .place-reveal { animation: revealPlace 0.8s ease; }
+  @keyframes revealPlace {
+    0% { opacity: 0; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .answers-review {
+    background: #f5faff;
+    border-radius: 14px;
+    padding: 14px;
+    margin: 14px 0;
+    text-align: left;
+    font-size: 13px;
+    color: #4a6b8e;
+    border: 1px solid #d8e8f7;
+  }
+  .answers-review .rev-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #7a96b4;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .ans-item {
+    margin-bottom: 8px;
+    line-height: 1.5;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #e0ecf7;
+  }
+  .ans-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .ans-q { font-weight: 700; color: #1e3a5f; display: block; margin-bottom: 2px; }
+  .ans-a { color: #3d7bc4; }
+  .ans-ok { color: #2e7d32; font-weight: 700; }
+  .ans-no { color: #c62828; font-weight: 700; }
+
+  /* --- toast --- */
+  #toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e3a5f;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 30px;
+    font-size: 14px;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    box-shadow: 0 8px 24px rgba(30,58,95,0.4);
+    max-width: 90%;
+    text-align: center;
+    font-family: inherit;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(10px);
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 420px) {
+    .card { padding: 26px 18px; }
+    h1 { font-size: 21px; }
+    .question { font-size: 17px; }
+    .btn { padding: 13px 30px; font-size: 15px; }
+    .day { font-size: 13px; }
+    .time-slot { padding: 8px 12px; font-size: 13px; }
+    #toast { font-size: 13px; padding: 12px 20px; }
+  }
+.share-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+}
+.btn-share {
+  flex: 1 1 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: none;
+  font-weight: 700;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+}
+.btn-share:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.22); }
+.btn-share:active { transform: scale(0.96); }
+.btn-wa    { background: linear-gradient(135deg, #25D366, #128C7E); }
+.btn-tg    { background: linear-gradient(135deg, #2AABEE, #0088cc); }
+.btn-viber { background: linear-gradient(135deg, #9B8CFF, #7360f2); }
+.btn-share-native { background: linear-gradient(135deg, #6bb0e8, #3d7bc4); }
+.btn-copy  { background: linear-gradient(135deg, #a8cbec, #6bb0e8); }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- ===== СТАРТ ===== -->
+  <div class="screen active" id="screen-start">
+    <div class="big-emoji">💙</div>
+    <h1>Привет, Настасьюшка!</h1>
+    <p class="subtitle">Небольшой тест про нас двоих</p>
+    <button class="btn" onclick="startQuiz()">Начать 💙</button>
+  </div>
+
+  <!-- ===== ТЕСТ ===== -->
+  <div class="screen" id="screen-quiz">
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="q-counter" id="qCounter"></div>
+    <h2 class="question" id="questionText"></h2>
+    <p class="question-hint" id="questionHint"></p>
+    <div id="optionsBox"></div>
+    <div class="reply" id="replyBox"></div>
+    <button class="btn" id="nextBtn" style="display:none">Далее →</button>
+  </div>
+
+  <!-- ===== КАЛЕНДАРЬ ===== -->
+  <div class="screen" id="screen-date">
+    <div class="big-emoji">📅</div>
+    <h1>Когда увидимся?</h1>
+    <p class="subtitle">Выбери дату и время, когда тебе удобно</p>
+    <p class="hint">Место я уже выбрал — покажу, как подтвердишь 😉</p>
+
+    <div class="calendar-wrap">
+      <div class="calendar-header">
+        <button id="prevMonth" onclick="changeMonth(-1)">‹</button>
+        <span id="monthLabel"></span>
+        <button id="nextMonth" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="calendar-weekdays">
+        <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="time-slots" id="timeSlots"></div>
+
+    <button class="btn" id="confirmDateBtn" disabled onclick="confirmDate()">Подтвердить 💙</button>
+  </div>
+
+  <!-- ===== ИТОГ ===== -->
+  <div class="screen" id="screen-summary">
+    <div class="big-emoji">🎉</div>
+    <h1>Договорились!</h1>
+
+    <div class="place-reveal">
+      <div class="info-card">
+        <div class="label">Когда</div>
+        <div class="value" id="summaryDate"></div>
+        <div class="label">Во сколько</div>
+        <div class="value" id="summaryTime"></div>
+        <div class="label">А место - </div>
+        <div class="value" id="summaryPlace"></div>
+      </div>
+    </div>
+
+    <div class="answers-review" id="answersReview"></div>
+
+    <div class="summary-note">
+      <p><strong>И самое главное 💙</strong></p>
+      <p>Ты лучшее, что со мной случилось. 
+         Может я где-то ошибся, что-то делал не правильно, но это свойственно всем. Я хочу строить жизнь вместе с тобой.</p>
+      <p style="font-size:12px;color:#7a96b4;margin-top:6px">Вместе с 27 декабря 2018 💙</p>
+    </div>
+
+    <div class="btn-row">
+      <div class="share-row">
+  <button class="btn-share btn-wa" onclick="sendWhatsApp()">💚 WhatsApp</button>
+  <button class="btn-share btn-tg" onclick="sendTelegram()">✈️ Telegram</button>
+  <button class="btn-share btn-viber" onclick="sendViber()">💜 Viber</button>
+  <button class="btn-share btn-share-native" onclick="shareNative(this)">📤 Поделиться</button>
+</div>
+
+<button class="btn btn-secondary" style="margin-top:10px" onclick="copyAnswers(this)">📋 Скопировать текст</button>
+
+<p class="hint" style="margin-top:16px">Выбери мессенджер — и я получу все ответы 💙</p>
+  </div>
+
+</div>
+
+<script>
+/* ==========================================================
+   ⚙️ НАСТРОЙКА
+   ========================================================== */
+const CONFIG = {
+  yourName: 'Владик',
+  herName: 'Настасьюшка',
+  place: 'Stories - Великий Гостинец 67Ш (SixSeven)',
+  viberNumber: '+375333891523',
+  telegramUsername: 'fuckingvlad',
+  formspreeEndpoint: ''
+};
+
+/* ==========================================================
+   ❓ ВОПРОСЫ
+   ========================================================== */
+const QUESTIONS = [
+  {
+    id: 'q1',
+    text: 'Через сколько ссор мы прошли?',
+    hint: 'Выбери один вариант',
+    type: 'single',
+    options: [
+      { text: '157', correct: false },
+      { text: '0', correct: false },
+      { text: 'Я не считала (очевидно)', correct: true }
+    ],
+    caption: 'Correct! я тоже не считал :)<br>Но мы всегда оставались вместе 💙'
+  },
+  {
+    id: 'q2',
+    text: 'Почему мы должны быть вместе и дальше?',
+    hint: 'Можно выбрать несколько вариантов',
+    type: 'multi',
+    options: [
+      { text: 'Владик скучает :(', correct: true },
+      { text: 'Мы всегда друг для друга поддержка', correct: true },
+      { text: 'Нам комфортно рядом друг с другом', correct: true },
+      { text: 'У нас всегда были цели (хоть мы немного и ленимся))', correct: true },
+      { text: 'Мы всегда проходили через трудности', correct: true },
+      { text: 'Мы друг для друга уже родные, так долго вместе (почти 8 лет)', correct: true }
+    ],
+    caption: 'Не все отношения идеальны - мы просто растём вместе.<br>Какая разница как, это ведь наша жизнь 💙'
+  },
+  {
+    id: 'q3',
+    text: 'Существует ли человек который близок тебе(на уровне мамы, но не она)?',
+    type: 'single',
+    options: [
+      { text: 'Ты', correct: true },
+      { text: 'Кто-то есть', correct: false, runaway: true }
+    ],
+    caption: 'Awesome! Good! Fantastic!'
+  },
+  {
+    id: 'q4',
+    text: 'Ты меня любишь? 💙',
+    type: 'single',
+    options: [
+      { text: 'Yes 💙', correct: true },
+      { text: 'Нет', correct: false, blocked: true }
+    ],
+    caption: 'Хе-хе, я знал! Взаимно)'
+  }
+];
+
+/* ==========================================================
+   🧠 ЛОГИКА ТЕСТА
+   ========================================================== */
+let current = 0;
+let locked = false;
+let answersLog = [];
+let activeRunaway = null;
+let lastRunawayJump = 0;
+
+document.addEventListener('pointermove', (e) => {
+  if (!activeRunaway) return;
+  if (e.pointerType === 'touch') return;   // на таче работает touchstart
+  const r = activeRunaway.btn.getBoundingClientRect();
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+  const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+  // срабатывает заранее — навестись невозможно
+  if (dist < Math.max(r.width, r.height) / 2 + 90) {
+    activeRunaway.jump();
+  }
+}, { passive: true });
+
+const progressBar  = document.getElementById('progressBar');
+const qCounter     = document.getElementById('qCounter');
+const questionText = document.getElementById('questionText');
+const questionHint = document.getElementById('questionHint');
+const optionsBox   = document.getElementById('optionsBox');
+const replyBox     = document.getElementById('replyBox');
+const nextBtn      = document.getElementById('nextBtn');
+
+/* --- toast --- */
+function showToast(msg) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(window.toastTimer);
+  window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz() {
+  current = 0;
+  locked = false;
+  answersLog = [];
+  progressBar.style.width = '0%';
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  qCounter.textContent = `Вопрос ${current + 1} из ${QUESTIONS.length}`;
+  progressBar.style.width = (current / QUESTIONS.length) * 100 + '%';
+  questionText.textContent = q.text;
+  questionHint.textContent = q.hint || '';
+  questionHint.style.display = q.hint ? 'block' : 'none';
+  replyBox.classList.remove('show');
+  replyBox.innerHTML = '';
+  optionsBox.innerHTML = '';
+  optionsBox.style.position = '';
+  nextBtn.style.display = 'none';
+  nextBtn.disabled = false;
+  nextBtn.textContent = 'Далее →';
+  nextBtn.onclick = nextQuestion;
+  locked = false;
+
+  if (q.type === 'single') renderSingle(q);
+  else renderMulti(q);
+}
+
+/* --- одиночный выбор --- */
+function renderSingle(q) {
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt.text;
+
+    if (opt.blocked) {
+      btn.classList.add('blocked-btn');
+      btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showToast('Извините, данная кнопка не работает. Impossible to Press');
+        return false;
+      };
+    } else if (opt.runaway) {
+      btn.classList.add('runaway-btn');
+      let jumps = 0;
+      const jump = () => {
+        jumps++;
+        const dx = (Math.random() - 0.5) * 70;
+        const dy = (Math.random() - 0.5) * 30;
+        const rot = (Math.random() - 0.5) * 14;
+        btn.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+        if (jumps === 4) showToast('Сдавайся, эту кнопку не нажать)');
+      };
+      btn.addEventListener('mouseenter', jump);
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        jump();
+        return false;
+      });
+      btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        jump();
+      }, { passive: false });
+    } else {
+      if (opt.correct) btn.classList.add('keep-on-top');
+      btn.onclick = () => selectSingle(q, idx, btn);
+    }
+
+    optionsBox.appendChild(btn);
+  });
+}
+
+function selectSingle(q, idx, btn) {
+  if (locked) return;
+  locked = true;
+
+  const allBtns = optionsBox.querySelectorAll('.option');
+  const chosen = q.options[idx];
+  const correctIdx = q.options.findIndex(o => o.correct);
+
+  answersLog.push({
+    question: q.text,
+    answer: chosen.text,
+    correct: chosen.correct
+  });
+
+  if (chosen.correct) {
+    btn.classList.add('correct');
+    replyBox.innerHTML = '💙 Отлично!<br>' + q.caption;
+  } else {
+    btn.classList.add('wrong');
+    setTimeout(() => allBtns[correctIdx].classList.add('correct'), 400);
+    replyBox.innerHTML = 'Хммм.. Не совсем...<br>Правильный ответ: <strong>' +
+      q.options[correctIdx].text + '</strong><br><br>' + q.caption;
+  }
+
+  allBtns.forEach(b => b.disabled = true);
+  replyBox.classList.add('show');
+  nextBtn.style.display = 'inline-block';
+}
+
+/* --- множественный выбор --- */
+function renderMulti(q) {
+  const selected = new Set();
+
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt.text;
+    btn.onclick = () => {
+      if (locked) return;
+      if (selected.has(idx)) {
+        selected.delete(idx);
+        btn.classList.remove('selected');
+      } else {
+        selected.add(idx);
+        btn.classList.add('selected');
+      }
+      nextBtn.disabled = selected.size === 0;
+    };
+    optionsBox.appendChild(btn);
+  });
+
+  nextBtn.textContent = 'Проверить 💙';
+  nextBtn.disabled = true;
+  nextBtn.style.display = 'inline-block';
+  nextBtn.onclick = () => checkMulti(q, selected);
+}
+
+function checkMulti(q, selected) {
+  if (locked) return;
+  locked = true;
+  nextBtn.textContent = 'Далее →';
+  nextBtn.disabled = false;
+  nextBtn.onclick = nextQuestion;
+
+  const allBtns = optionsBox.querySelectorAll('.option');
+  const correctIdxs = q.options.map((o, i) => o.correct ? i : -1).filter(i => i >= 0);
+  const missed = correctIdxs.filter(i => !selected.has(i));
+  const allCorrect = missed.length === 0;
+
+  answersLog.push({
+    question: q.text,
+    answer: Array.from(selected).map(i => q.options[i].text).join('; ') || '(ничего не выбрано)',
+    correct: allCorrect
+  });
+
+  allBtns.forEach(b => b.disabled = true);
+
+  if (allCorrect) {
+    replyBox.innerHTML = '💙 Идеально! Всё верно.<br><br>' + q.caption;
+  } else {
+    setTimeout(() => {
+      missed.forEach(i => {
+        allBtns[i].classList.remove('selected');
+        allBtns[i].classList.add('missed');
+      });
+    }, 300);
+    replyBox.innerHTML = '💙 Почти! Некоторые причины ты не отметила —<br>но они тоже правда (отмечены пунктиром).<br><br>' + q.caption;
+  }
+
+  replyBox.classList.add('show');
+}
+
+function nextQuestion() {
+  current++;
+  if (current < QUESTIONS.length) {
+    renderQuestion();
+  } else {
+    progressBar.style.width = '100%';
+    showScreen('screen-date');
+    initCalendar();
+  }
+}
+
+/* ==========================================================
+   📅 КАЛЕНДАРЬ + ВРЕМЯ
+   ========================================================== */
+const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const WEEKDAYS = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+const TIME_SLOTS = ['10:00','12:00','14:00','16:00','18:00','20:00'];
+
+let currentMonth = new Date();
+currentMonth.setDate(1);
+let selectedDate = null;
+let selectedTime = null;
+
+function initCalendar() {
+  currentMonth = new Date();
+  currentMonth.setDate(1);
+  selectedDate = null;
+  selectedTime = null;
+
+  const slotsBox = document.getElementById('timeSlots');
+  slotsBox.innerHTML = '';
+  TIME_SLOTS.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'time-slot';
+    b.textContent = t;
+    b.onclick = () => {
+      selectedTime = t;
+      slotsBox.querySelectorAll('.time-slot').forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      updateConfirmBtn();
+    };
+    slotsBox.appendChild(b);
+  });
+
+  renderCalendar();
+  updateConfirmBtn();
+}
+
+function renderCalendar() {
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  document.getElementById('monthLabel').textContent = `${MONTHS[month]} ${year}`;
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const maxDate = new Date();
+  maxDate.setDate(maxDate.getDate() + 60);
+
+  const now = new Date();
+  const isCurrentMonth = year === now.getFullYear() && month === now.getMonth();
+  document.getElementById('prevMonth').disabled = isCurrentMonth;
+
+  const firstDay = new Date(year, month, 1);
+  const startOffset = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < startOffset; i++) grid.appendChild(document.createElement('div'));
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month, d);
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isPast = date < today;
+    const isTooFar = date > maxDate;
+
+    const cell = document.createElement('button');
+    cell.className = 'day';
+    cell.textContent = d;
+    if (isPast || isTooFar) {
+      cell.disabled = true;
+      cell.classList.add('disabled');
+    } else {
+      cell.onclick = () => selectDate(dateStr);
+    }
+    if (selectedDate === dateStr) cell.classList.add('selected');
+    if (date.toDateString() === today.toDateString()) cell.classList.add('today');
+
+    grid.appendChild(cell);
+  }
+}
+
+function selectDate(dateStr) {
+  selectedDate = dateStr;
+  renderCalendar();
+  updateConfirmBtn();
+}
+
+function changeMonth(delta) {
+  const now = new Date();
+  const newMonth = new Date(currentMonth);
+  newMonth.setMonth(newMonth.getMonth() + delta);
+  if (newMonth.getFullYear() < now.getFullYear() ||
+      (newMonth.getFullYear() === now.getFullYear() && newMonth.getMonth() < now.getMonth())) {
+    return;
+  }
+  currentMonth = newMonth;
+  renderCalendar();
+}
+
+function updateConfirmBtn() {
+  document.getElementById('confirmDateBtn').disabled = !(selectedDate && selectedTime);
+}
+
+function confirmDate() {
+  if (!selectedDate || !selectedTime) return;
+
+  const [y, m, d] = selectedDate.split('-').map(Number);
+  const dateObj = new Date(y, m - 1, d);
+  const dateFormatted = `${d} ${MONTHS[m-1].toLowerCase()} ${y}`;
+  const weekday = WEEKDAYS[dateObj.getDay()];
+
+  document.getElementById('summaryDate').textContent = `${dateFormatted} (${weekday})`;
+  document.getElementById('summaryTime').textContent = selectedTime;
+  document.getElementById('summaryPlace').textContent = CONFIG.place;
+
+  answersLog.push({
+    question: 'Дата и время встречи',
+    answer: `${dateFormatted}, ${selectedTime}`,
+    correct: true
+  });
+
+  renderAnswersReview();
+  showScreen('screen-summary');
+  heartBurst();
+
+  if (CONFIG.formspreeEndpoint) sendToFormspree();
+}
+
+function renderAnswersReview() {
+  const box = document.getElementById('answersReview');
+  box.innerHTML = '<div class="rev-title">Твои ответы</div>';
+  answersLog.forEach(a => {
+    const mark = a.correct ? '<span class="ans-ok">✓</span>' : '<span class="ans-no">✕</span>';
+    box.innerHTML += `<div class="ans-item"><span class="ans-q">${a.question}</span><span class="ans-a">${a.answer}</span> ${mark}</div>`;
+  });
+}
+
+/* ==========================================================
+   📤 ОТПРАВКА
+   ========================================================== */
+function buildMessage() {
+  let msg = `Привет, ${CONFIG.yourName}! 💙\n\nПрошла тест. Вот мои ответы:\n\n`;
+  answersLog.forEach((a, i) => {
+    msg += `${i + 1}. ${a.question}\n   → ${a.answer}\n\n`;
+  });
+  msg += `Место встречи: ${CONFIG.place}\n\nВместе с 27.12.2018 💙`;
+  return msg;
+}
+
+function sendWhatsApp() {
+  const text = encodeURIComponent(buildMessage());
+  window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${text}`, '_blank');
+}
+
+function sendTelegram() {
+  const text = encodeURIComponent(buildMessage());
+  if (CONFIG.telegramUsername) {
+    const user = CONFIG.telegramUsername.replace('@', '');
+    window.open(`https://t.me/${user}?text=${text}`, '_blank');
+  } else {
+    window.open(`https://t.me/share/url?url=&text=${text}`, '_blank');
+  }
+}
+
+function sendViber() {
+  const text = encodeURIComponent(buildMessage());
+  if (CONFIG.viberNumber) {
+    // Viber понимает URL-схему с номером — откроет чат с тобой + текст
+    window.open(`viber://chat?number=${encodeURIComponent(CONFIG.viberNumber)}&text=${text}`, '_blank');
+    // если вдруг не сработало — предложим через 800мс скопировать
+    setTimeout(() => showToast('Если Viber не открылся — нажми «Скопировать» 💙'), 900);
+  } else {
+    window.open(`viber://forward?text=${text}`, '_blank');
+  }
+}
+
+async function shareNative(btn) {
+  const text = buildMessage();
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Мои ответы 💙', text });
+    } catch (e) { /* отменила — ок */ }
+  } else {
+    copyAnswers(btn);
+    showToast('Скопировано!(надо будет отправить в каком-то мессенжере)');
+  }
+}
+
+async function copyAnswers(btn) {
+  const text = buildMessage();
+  const original = btn.textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.textContent = '📋 Скопировано ✓';
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '📋 Скопировано ✓';
+  }
+  setTimeout(() => btn.textContent = original, 2000);
+}
+
+function sendToFormspree() {
+  fetch(CONFIG.formspreeEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      answers: answersLog,
+      date: selectedDate,
+      time: selectedTime,
+      place: CONFIG.place
+    })
+  }).catch(err => console.warn('Formspree error:', err));
+}
+function sendToFormspree() {
+  fetch(CONFIG.formspreeEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      answers: answersLog,
+      date: selectedDate,
+      time: selectedTime,
+      place: CONFIG.place
+    })
+  }).catch(err => console.warn('Formspree error:', err));
+}
+
+/* ==========================================================
+   🎨 ФОН
+   ========================================================== */
+function spawnHeart() {
+  const h = document.createElement('div');
+  h.className = 'heart';
+  h.textContent = ['💙','🩵','🤍','✨','💎','🫧'][Math.floor(Math.random() * 6)];
+  h.style.left = Math.random() * 100 + 'vw';
+  h.style.fontSize = (12 + Math.random() * 22) + 'px';
+  h.style.opacity = 0.3 + Math.random() * 0.4;
+  h.style.animationDuration = (7 + Math.random() * 7) + 's';
+  document.body.appendChild(h);
+  setTimeout(() => h.remove(), 14000);
+}
+
+function heartBurst() {
+  for (let i = 0; i < 34; i++) {
+    setTimeout(() => {
+      const h = document.createElement('div');
+      h.className = 'burst-heart';
+      h.textContent = ['💙','🩵','🤍','✨','💎','🫧'][Math.floor(Math.random() * 6)];
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 90 + Math.random() * 220;
+      h.style.setProperty('--x', Math.cos(angle) * dist + 'px');
+      h.style.setProperty('--y', Math.sin(angle) * dist + 'px');
+      h.style.left = '50%';
+      h.style.top = '45%';
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 1500);
+    }, i * 35);
+  }
+}
+
+setInterval(spawnHeart, 800);
+for (let i = 0; i < 5; i++) setTimeout(spawnHeart, i * 300);
+</script>
+
+</body>
+</html>
